@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
 import { startAudio, setMoodAudio } from '../audio.js';
+import { setTouchControls } from '../main.js';
+import { Robey } from '../entities/Robey.js';
 
 export class MenuScene extends Phaser.Scene {
   constructor() { super('MenuScene'); }
   create() {
+    setTouchControls(false);
     const { width, height } = this.scale;
     const cx = width / 2;
 
@@ -44,7 +47,7 @@ export class MenuScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
-    const subtitle = this.add.text(cx, height * 0.46, 'The Lost Jungle Temple', {
+    const subtitle = this.add.text(cx, height * 0.4, 'The Lost Jungle Temple', {
       fontFamily: 'Bookman Old Style, Georgia, serif',
       fontSize: Math.min(32, width / 26) + 'px',
       fontStyle: 'italic',
@@ -53,10 +56,24 @@ export class MenuScene extends Phaser.Scene {
       strokeThickness: 4,
     }).setOrigin(0.5);
 
-    // Begin button
-    const btn = this.add.rectangle(cx, height * 0.66, 240, 70, 0xff7a3a)
+    // Robey portrait — uses the same rigged character with physics disabled.
+    const robey = new Robey(this, cx, height * 0.7);
+    if (robey.body) {
+      robey.body.setAllowGravity(false);
+      robey.body.enable = false;
+    }
+    const portraitScale = Phaser.Math.Clamp(height / 700, 1.0, 1.6);
+    robey.setScale(portraitScale);
+    // Gentle hover bob layered on top of the rig's existing idle tween.
+    this.tweens.add({
+      targets: robey, y: robey.y - 8, duration: 1600, yoyo: true, repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+
+    // Begin button — the ONLY interactive element on the home screen.
+    const btn = this.add.rectangle(cx, height * 0.88, 240, 70, 0xff7a3a)
       .setStrokeStyle(4, 0x3a2010);
-    const btnText = this.add.text(cx, height * 0.66, 'BEGIN', {
+    this.add.text(cx, height * 0.88, 'BEGIN', {
       fontFamily: 'Bookman Old Style, Georgia, serif',
       fontSize: '32px', fontStyle: 'bold',
       color: '#3a2010',
@@ -65,26 +82,17 @@ export class MenuScene extends Phaser.Scene {
     btn.on('pointerover', () => btn.setScale(1.04));
     btn.on('pointerout', () => btn.setScale(1));
 
-    this.add.text(cx, height - 40, 'Tap or click anywhere to begin', {
-      fontFamily: 'Bookman Old Style, Georgia, serif',
-      fontSize: '16px', color: '#fff7d6',
-    }).setOrigin(0.5).setAlpha(0.7);
-
-    // One click handler at the scene level handles both the button and
-    // anywhere-else taps. Scene transition is independent of audio start
-    // so a stalled AudioContext can never block the game.
     let started = false;
     const begin = () => {
       if (started) return;
       started = true;
       btn.disableInteractive();
-      // Fire-and-forget — audio is best-effort, never blocks the scene.
       Promise.resolve()
         .then(() => startAudio())
         .then(() => setMoodAudio('bright'))
         .catch((err) => console.warn('audio start failed', err));
       this.scene.start('BedroomScene');
     };
-    this.input.on('pointerdown', begin);
+    btn.on('pointerdown', begin);
   }
 }

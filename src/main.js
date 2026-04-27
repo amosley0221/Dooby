@@ -6,10 +6,16 @@ import { JungleScene } from './scenes/JungleScene.js';
 import { TempleScene } from './scenes/TempleScene.js';
 import { EndingScene } from './scenes/EndingScene.js';
 
-const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-if (isTouch) {
-  document.getElementById('touch-controls')?.classList.remove('hidden');
+// Touch controls are owned by individual scenes (jungle/temple) and stay
+// hidden on menu/bedroom/ending screens. Each scene calls setTouchControls
+// from this module on enter to set visibility.
+export const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+export function setTouchControls(visible) {
+  const el = document.getElementById('touch-controls');
+  if (!el) return;
+  el.classList.toggle('hidden', !(visible && isTouch));
 }
+setTouchControls(false);
 
 const config = {
   type: Phaser.AUTO,

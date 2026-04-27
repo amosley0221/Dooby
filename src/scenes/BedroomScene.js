@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
 import { Robey } from '../entities/Robey.js';
+import { setTouchControls } from '../main.js';
 
 // Page 1 of the book — Robey in his bedroom, declares the adventure,
 // the walls melt away, scene transitions to the jungle.
 export class BedroomScene extends Phaser.Scene {
   constructor() { super('BedroomScene'); }
   create() {
+    setTouchControls(false);
     const { width, height } = this.scale;
     const cx = width / 2;
     const groundY = height - 80;

@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { Robey } from '../entities/Robey.js';
 import { setMoodAudio } from '../audio.js';
+import { setTouchControls } from '../main.js';
 
 // Pages 2-7 condensed: vibrant jungle expedition that gradually grows
 // taller and dimmer as Robey approaches the temple. Side-scrolling.
 export class JungleScene extends Phaser.Scene {
   constructor() { super('JungleScene'); }
   create() {
+    setTouchControls(true);
     const { width, height } = this.scale;
     const worldWidth = 5400;
     const groundY = height - 90;

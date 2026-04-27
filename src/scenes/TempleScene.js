@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Robey } from '../entities/Robey.js';
 import { ShadowVine } from '../entities/ShadowVine.js';
 import { setMoodAudio, playSting } from '../audio.js';
+import { setTouchControls } from '../main.js';
 
 // Pages 8-15: inside the temple. Doors slam shut, vines come alive,
 // Robey must slash through them to reveal the escape path. Once enough
@@ -9,6 +10,7 @@ import { setMoodAudio, playSting } from '../audio.js';
 export class TempleScene extends Phaser.Scene {
   constructor() { super('TempleScene'); }
   create() {
+    setTouchControls(true);
     const { width, height } = this.scale;
     const worldWidth = 4200;
     const groundY = height - 90;

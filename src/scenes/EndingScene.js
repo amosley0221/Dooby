@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
 import { Robey } from '../entities/Robey.js';
 import { setMoodAudio } from '../audio.js';
+import { setTouchControls } from '../main.js';
 
 // Pages 16-18: THUMP back to bedroom, resolution.
 export class EndingScene extends Phaser.Scene {
   constructor() { super('EndingScene'); }
   create() {
+    setTouchControls(false);
     const { width, height } = this.scale;
     const cx = width / 2;
     const groundY = height - 80;
