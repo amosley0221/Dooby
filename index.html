@@ -13,12 +13,22 @@
     <div id="game-root"></div>
     <div id="touch-controls" class="hidden">
       <div id="dpad">
-        <button id="btn-left" class="dpad-btn" aria-label="Left">&#9664;</button>
-        <button id="btn-right" class="dpad-btn" aria-label="Right">&#9654;</button>
+        <button id="btn-left" class="dpad-btn" aria-label="Move left">
+          <span class="btn-icon">&#9664;</span>
+        </button>
+        <button id="btn-right" class="dpad-btn" aria-label="Move right">
+          <span class="btn-icon">&#9654;</span>
+        </button>
       </div>
       <div id="action-buttons">
-        <button id="btn-jump" class="action-btn" aria-label="Jump">JUMP</button>
-        <button id="btn-slash" class="action-btn" aria-label="Slash">SLASH</button>
+        <button id="btn-jump" class="action-btn jump-btn" aria-label="Jump">
+          <span class="btn-icon">&#10514;</span>
+          <span class="btn-label">JUMP</span>
+        </button>
+        <button id="btn-slash" class="action-btn slash-btn" aria-label="Slash">
+          <span class="btn-icon">&#9876;</span>
+          <span class="btn-label">SLASH</span>
+        </button>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

@@ -32,116 +32,146 @@ function bake(scene, key, w, h, drawFn) {
 
 // --- Robey parts (drawn separately so we can rig them) ---
 function generateRobeyParts(scene) {
-  // Head: round face, rosy cheeks, big eyes, spiky brown hair on top
-  bake(scene, 'robey-head', 90, 100, (g) => {
-    // Hair (back)
-    g.fillStyle(0x3a2418, 1);
-    g.fillCircle(45, 32, 30);
-    // Spiky bangs
-    for (let i = 0; i < 7; i++) {
-      const x = 18 + i * 9;
-      const y = 18 + Math.sin(i) * 4;
-      g.fillTriangle(x - 6, y + 12, x + 6, y + 12, x + (i % 2 ? 4 : -4), y - 6);
-    }
-    // Face skin
+  // Head: round face, BIG eyes, rosy cheeks, open smile, multi-spike hair.
+  // Designed to read like the reference at small/medium screen sizes.
+  bake(scene, 'robey-head', 80, 80, (g) => {
+    // Face skin (drawn first as base)
     g.fillStyle(0xf6caa0, 1);
-    g.fillCircle(45, 50, 26);
+    g.fillCircle(40, 44, 26);
+    // Hair back
+    g.fillStyle(0x3a2418, 1);
+    g.fillEllipse(40, 22, 56, 28);
+    // Spiky hair tufts on top
+    const spikes = [
+      [14, 20], [22, 10], [30, 4], [40, 0], [50, 4], [58, 10], [66, 20],
+    ];
+    g.fillStyle(0x3a2418, 1);
+    for (let i = 0; i < spikes.length - 1; i++) {
+      const [x1, y1] = spikes[i];
+      const [x2, y2] = spikes[i + 1];
+      g.fillTriangle(x1, 26, x2, 26, (x1 + x2) / 2, Math.min(y1, y2) - 2);
+    }
+    // Side hair flicks
+    g.fillTriangle(12, 30, 20, 22, 16, 36);
+    g.fillTriangle(68, 30, 60, 22, 64, 36);
     // Cheeks (rosy)
-    g.fillStyle(0xff8a8a, 0.6);
-    g.fillCircle(28, 56, 7);
-    g.fillCircle(62, 56, 7);
-    // Eyes (whites)
+    g.fillStyle(0xff8a8a, 0.7);
+    g.fillCircle(20, 50, 7);
+    g.fillCircle(60, 50, 7);
+    // Eye whites - large, expressive
     g.fillStyle(0xffffff, 1);
-    g.fillCircle(33, 46, 7);
-    g.fillCircle(57, 46, 7);
+    g.fillCircle(28, 42, 9);
+    g.fillCircle(52, 42, 9);
     // Eye outlines
     g.lineStyle(2, 0x1a0e08, 1);
-    g.strokeCircle(33, 46, 7);
-    g.strokeCircle(57, 46, 7);
+    g.strokeCircle(28, 42, 9);
+    g.strokeCircle(52, 42, 9);
     // Pupils
-    g.fillStyle(0x1a0e08, 1);
-    g.fillCircle(34, 47, 3.2);
-    g.fillCircle(58, 47, 3.2);
+    g.fillStyle(0x3a2418, 1);
+    g.fillCircle(29, 43, 4);
+    g.fillCircle(53, 43, 4);
     // Eye shines
     g.fillStyle(0xffffff, 1);
-    g.fillCircle(35, 45, 1.2);
-    g.fillCircle(59, 45, 1.2);
+    g.fillCircle(30, 41, 1.6);
+    g.fillCircle(54, 41, 1.6);
+    // Eyebrows
+    g.lineStyle(2.2, 0x1a0e08, 1);
+    g.lineBetween(22, 32, 34, 30);
+    g.lineBetween(46, 30, 58, 32);
     // Nose
     g.fillStyle(0xff7a59, 1);
-    g.fillCircle(45, 56, 3.5);
-    // Mouth (open smile)
+    g.fillCircle(40, 52, 3.2);
+    // Open smiling mouth with teeth
     g.fillStyle(0x1a0e08, 1);
-    g.fillEllipse(45, 67, 16, 8);
-    // Teeth
+    g.fillEllipse(40, 62, 18, 10);
     g.fillStyle(0xffffff, 1);
-    g.fillRect(40, 64, 10, 3);
-    // Outline of head
-    g.lineStyle(2.5, 0x1a0e08, 1);
-    g.strokeCircle(45, 50, 26);
+    g.fillRect(33, 58, 14, 4);
+    g.lineStyle(1, 0xc05050, 1);
+    g.lineBetween(34, 62, 46, 62);
+    // Face outline
+    g.lineStyle(2.2, 0x1a0e08, 1);
+    g.strokeCircle(40, 44, 26);
   });
 
-  // Torso: green dinosaur-print explorer shirt, slightly tapered
-  bake(scene, 'robey-torso', 80, 80, (g) => {
+  // Torso: lighter green explorer shirt with dinosaur silhouettes + leaves
+  bake(scene, 'robey-torso', 60, 64, (g) => {
     // Shirt body
-    g.fillStyle(0x3aa55a, 1);
-    g.fillRoundedRect(8, 4, 64, 70, 10);
-    // Collar (lighter green)
-    g.fillStyle(0x6acc7a, 1);
-    g.fillTriangle(28, 4, 52, 4, 40, 18);
+    g.fillStyle(0x4ec06a, 1);
+    g.fillRoundedRect(4, 4, 52, 58, 8);
+    // Lighter shoulder caps
+    g.fillStyle(0x6dd97a, 1);
+    g.fillCircle(10, 10, 6);
+    g.fillCircle(50, 10, 6);
+    // V-collar with white tee underneath
     g.fillStyle(0xfff7d6, 1);
-    g.fillTriangle(34, 6, 46, 6, 40, 14);
-    // Dinosaur print specks (orange and dark green)
-    g.fillStyle(0xff7a3a, 1);
-    g.fillCircle(20, 24, 3.2);
-    g.fillCircle(56, 36, 3.2);
-    g.fillCircle(30, 50, 3.0);
-    g.fillStyle(0x205c34, 1);
-    g.fillCircle(48, 22, 2.6);
-    g.fillCircle(18, 44, 2.6);
-    g.fillCircle(58, 60, 2.8);
-    g.fillCircle(34, 64, 2.4);
-    // Pocket outline
+    g.fillTriangle(24, 4, 36, 4, 30, 16);
     g.lineStyle(1.6, 0x205c34, 1);
-    g.strokeRoundedRect(46, 38, 18, 18, 3);
+    g.strokeTriangle(24, 4, 36, 4, 30, 16);
+    // Dinosaur silhouettes (tiny T-rex shapes - body + tail + tiny head)
+    const dinos = [[14, 24], [38, 18], [22, 44], [42, 50]];
+    g.fillStyle(0x205c34, 1);
+    for (const [dx, dy] of dinos) {
+      g.fillEllipse(dx, dy, 7, 4);
+      g.fillTriangle(dx + 2, dy - 2, dx + 6, dy - 5, dx + 4, dy - 1);
+      g.fillRect(dx - 5, dy - 1, 1.5, 3);
+      g.fillRect(dx + 3, dy - 1, 1.5, 3);
+    }
+    // Leaf accents
+    g.fillStyle(0x97e6a0, 1);
+    g.fillEllipse(48, 30, 5, 3);
+    g.fillEllipse(12, 36, 5, 3);
+    g.fillEllipse(34, 38, 4, 2.6);
+    // Chest pocket
+    g.lineStyle(1.4, 0x205c34, 1);
+    g.strokeRoundedRect(38, 28, 14, 12, 2);
+    g.fillStyle(0xff7a3a, 1);
+    g.fillCircle(45, 34, 1.8);
     // Outline
-    g.lineStyle(2.5, 0x1a0e08, 1);
-    g.strokeRoundedRect(8, 4, 64, 70, 10);
+    g.lineStyle(2.4, 0x1a0e08, 1);
+    g.strokeRoundedRect(4, 4, 52, 58, 8);
   });
 
-  // Arm: skin tube with shirt sleeve at top
-  bake(scene, 'robey-arm', 26, 60, (g) => {
-    g.fillStyle(0x3aa55a, 1);
-    g.fillRoundedRect(2, 0, 22, 22, 6);
+  // Arm: short sleeve at top, skin tube below, hand bulb at bottom
+  bake(scene, 'robey-arm', 18, 50, (g) => {
+    g.fillStyle(0x4ec06a, 1);
+    g.fillRoundedRect(2, 0, 14, 16, 4);
     g.fillStyle(0xf6caa0, 1);
-    g.fillRoundedRect(4, 18, 18, 38, 8);
-    g.lineStyle(2, 0x1a0e08, 1);
-    g.strokeRoundedRect(2, 0, 22, 22, 6);
-    g.strokeRoundedRect(4, 18, 18, 38, 8);
+    g.fillRoundedRect(3, 14, 12, 30, 5);
+    g.fillCircle(9, 44, 6);
+    g.lineStyle(1.6, 0x1a0e08, 1);
+    g.strokeRoundedRect(2, 0, 14, 16, 4);
+    g.strokeRoundedRect(3, 14, 12, 30, 5);
+    g.strokeCircle(9, 44, 6);
   });
 
-  // Leg: khaki shorts on top, bare leg, brown boot at bottom
-  bake(scene, 'robey-leg', 28, 64, (g) => {
+  // Leg: khaki cargo shorts + skin + sock + brown boot with laces
+  bake(scene, 'robey-leg', 22, 60, (g) => {
     // Shorts
+    g.fillStyle(0xc4a874, 1);
+    g.fillRoundedRect(1, 0, 20, 24, 4);
+    // Cargo pocket
     g.fillStyle(0xb89a64, 1);
-    g.fillRoundedRect(2, 0, 24, 22, 4);
+    g.fillRoundedRect(13, 8, 7, 10, 1.5);
+    g.lineStyle(1, 0x6b4a1a, 1);
+    g.strokeRoundedRect(13, 8, 7, 10, 1.5);
     // Skin
     g.fillStyle(0xf6caa0, 1);
-    g.fillRoundedRect(4, 20, 20, 22, 6);
-    // Sock
+    g.fillRect(3, 22, 16, 14);
+    // Sock band
     g.fillStyle(0xfff7d6, 1);
-    g.fillRect(4, 40, 20, 6);
+    g.fillRect(2, 36, 18, 4);
     // Boot
     g.fillStyle(0x6b3a1a, 1);
-    g.fillRoundedRect(2, 44, 24, 18, 4);
+    g.fillRoundedRect(1, 39, 20, 18, 3);
     g.fillStyle(0x3a2010, 1);
-    g.fillRect(2, 58, 24, 4);
+    g.fillRect(1, 54, 20, 4);
     // Laces
     g.fillStyle(0xfff7d6, 1);
-    for (let i = 0; i < 3; i++) g.fillRect(10, 48 + i * 3, 8, 1.4);
+    for (let i = 0; i < 3; i++) g.fillRect(7, 43 + i * 3, 8, 1.4);
     // Outlines
-    g.lineStyle(2, 0x1a0e08, 1);
-    g.strokeRoundedRect(2, 0, 24, 22, 4);
-    g.strokeRoundedRect(2, 44, 24, 18, 4);
+    g.lineStyle(1.6, 0x1a0e08, 1);
+    g.strokeRoundedRect(1, 0, 20, 24, 4);
+    g.strokeRoundedRect(1, 39, 20, 18, 3);
   });
 }
 
