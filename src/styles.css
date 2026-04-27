@@ -1,13 +1,13 @@
 :root {
-  --bright: #ffe9a8;
-  --dark: #0a0a14;
-  --accent: #ff7a59;
-  --soft: rgba(255, 255, 255, 0.85);
+  --jungle: #1d6b3a;
+  --jungle-deep: #08311a;
+  --warm: #ffd57a;
+  --paper: #fff7d6;
+  --ink: #1a0e08;
+  --accent: #ff7a3a;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
@@ -15,221 +15,72 @@ html, body {
   width: 100%;
   height: 100%;
   background: #000;
-  color: var(--soft);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  color: var(--paper);
+  font-family: "Bookman Old Style", Georgia, serif;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
 }
 
-#app {
+#game-root {
   position: fixed;
   inset: 0;
 }
 
-#game-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+#game-root canvas {
   display: block;
+  width: 100% !important;
+  height: 100% !important;
+  image-rendering: -webkit-optimize-contrast;
 }
 
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
-/* Start / End screens */
-#start-screen, #end-screen {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
-  background: radial-gradient(ellipse at center, rgba(20,20,40,0.55), rgba(0,0,0,0.92));
-  z-index: 10;
-  padding: 2rem;
-  text-align: center;
-}
-
-#start-screen h1 {
-  font-size: clamp(3rem, 12vw, 7rem);
-  margin: 0;
-  letter-spacing: 0.4rem;
-  background: linear-gradient(180deg, #fff5d4 0%, #ffb27a 60%, #c25a3a 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 4px 18px rgba(255, 160, 100, 0.35));
-}
-
-#start-screen .tag {
-  max-width: 32rem;
-  font-size: 1.05rem;
-  opacity: 0.85;
-  margin: 0;
-  font-style: italic;
-}
-
-#start-screen button, #end-screen button {
-  margin-top: 1rem;
-  padding: 0.8rem 2.4rem;
-  font-size: 1.1rem;
-  letter-spacing: 0.15rem;
-  background: var(--accent);
-  color: #1a0a05;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 6px 24px rgba(255, 122, 89, 0.45);
-}
-
-#start-screen button:hover, #end-screen button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(255, 122, 89, 0.6);
-}
-
-#start-screen .controls-hint {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  font-size: 0.85rem;
-  opacity: 0.65;
-}
-
-#end-screen h2 {
-  font-size: clamp(2rem, 8vw, 4rem);
-  margin: 0;
-}
-
-#end-screen p {
-  font-size: 1.1rem;
-  opacity: 0.75;
-  max-width: 28rem;
-  margin: 0;
-}
-
-/* HUD */
-#hud {
-  position: absolute;
-  top: env(safe-area-inset-top, 0);
-  left: 0;
-  right: 0;
-  padding: 1rem 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.95rem;
-  pointer-events: none;
-  z-index: 5;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
-}
-
-#objective {
-  opacity: 0.9;
-  letter-spacing: 0.05rem;
-}
-
-#seed-count {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
-
-/* Subtitle (story beats) */
-#subtitle {
-  position: absolute;
-  bottom: 18%;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 80%;
-  padding: 0.6rem 1.2rem;
-  background: rgba(0, 0, 0, 0.55);
-  border-radius: 0.6rem;
-  text-align: center;
-  font-size: 1rem;
-  font-style: italic;
-  z-index: 6;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-}
-
-#subtitle.visible {
-  opacity: 1;
-}
-
-/* Vignette overlay (mood) */
-#vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 4;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.0) 100%);
-  transition: background 2s ease;
-}
-
-#vignette.dark {
-  background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.85) 100%);
-}
-
-/* Touch controls (mobile) */
+/* Touch controls */
 #touch-controls {
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 7;
+  z-index: 50;
 }
 
-#joystick {
+#dpad, #action-buttons {
   position: absolute;
-  bottom: calc(env(safe-area-inset-bottom, 0) + 2rem);
-  left: 2rem;
-  width: 8rem;
-  height: 8rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 2px solid rgba(255, 255, 255, 0.18);
+  bottom: calc(env(safe-area-inset-bottom, 0) + 1.4rem);
+  display: flex;
+  gap: 0.6rem;
   pointer-events: auto;
-  touch-action: none;
 }
 
-#joystick-thumb {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 3.2rem;
-  height: 3.2rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  transition: background 0.15s ease;
-}
+#dpad { left: 1.2rem; }
+#action-buttons { right: 1.2rem; }
 
-#jump-button {
-  position: absolute;
-  bottom: calc(env(safe-area-inset-bottom, 0) + 2.5rem);
-  right: 2rem;
-  width: 5.5rem;
-  height: 5.5rem;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--soft);
-  font-weight: 700;
-  letter-spacing: 0.1rem;
-  font-size: 0.85rem;
-  pointer-events: auto;
+.dpad-btn, .action-btn {
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 999px;
+  border: 3px solid rgba(255, 247, 214, 0.85);
+  background: rgba(26, 14, 8, 0.55);
+  color: var(--paper);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.06rem;
   cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
-#jump-button:active {
-  background: rgba(255, 255, 255, 0.25);
+.action-btn {
+  font-size: 0.85rem;
+}
+
+#btn-slash {
+  background: rgba(120, 30, 12, 0.7);
+  border-color: var(--accent);
+}
+
+.dpad-btn:active, .action-btn:active {
+  transform: scale(0.94);
+  background: rgba(255, 247, 214, 0.25);
 }

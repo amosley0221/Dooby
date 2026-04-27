@@ -1,65 +1,35 @@
-import { Game } from './game.js';
-import { state, on, Phase, Mood } from './state.js';
+import Phaser from 'phaser';
+import { BootScene } from './scenes/BootScene.js';
+import { MenuScene } from './scenes/MenuScene.js';
+import { BedroomScene } from './scenes/BedroomScene.js';
+import { JungleScene } from './scenes/JungleScene.js';
+import { TempleScene } from './scenes/TempleScene.js';
+import { EndingScene } from './scenes/EndingScene.js';
 
-const canvas = document.getElementById('game-canvas');
-const startScreen = document.getElementById('start-screen');
-const startButton = document.getElementById('start-button');
-const endScreen = document.getElementById('end-screen');
-const endTitle = document.getElementById('end-title');
-const endText = document.getElementById('end-text');
-const restartButton = document.getElementById('restart-button');
-const hud = document.getElementById('hud');
-const seedCount = document.getElementById('seed-count');
-const objective = document.getElementById('objective');
-
-let game = null;
-
-startButton.addEventListener('click', async () => {
-  startScreen.classList.add('hidden');
-  hud.classList.remove('hidden');
-  if (!game) {
-    game = new Game(canvas);
-    game.onEnd = handleEnd;
-  }
-  await game.start();
-});
-
-restartButton.addEventListener('click', () => {
-  endScreen.classList.add('hidden');
-  game.resetForRestart();
-});
-
-on((event) => {
-  if (event.type === 'seed') {
-    seedCount.textContent = `${state.seedsCollected} / ${state.seedsTotal}`;
-    if (state.seedsCollected >= state.seedsTotal) {
-      objective.textContent = 'Get out. NOW.';
-    }
-  }
-  if (event.type === 'phase') {
-    if (event.value === Phase.REALIZE || event.value === Phase.FLEE) {
-      objective.textContent = 'Reach the hollow log beyond the cavern';
-    }
-    if (event.value === Phase.MENU) {
-      objective.textContent = 'Find the glowing seeds';
-      seedCount.textContent = `0 / ${state.seedsTotal}`;
-    }
-  }
-  if (event.type === 'mood') {
-    if (event.value === Mood.HOPE) objective.textContent = 'Stay in the light...';
-    else if (event.value === Mood.ESCAPE) objective.textContent = 'Reach the hollow log beyond the cavern';
-  }
-});
-
-function handleEnd(kind) {
-  setTimeout(() => {
-    if (kind === 'escaped') {
-      endTitle.textContent = 'You escaped.';
-      endText.textContent = 'For now. The forest remembers your scent.';
-    } else {
-      endTitle.textContent = 'It found you.';
-      endText.textContent = 'The seeds scattered into the leaves. The light went out.';
-    }
-    endScreen.classList.remove('hidden');
-  }, 2200);
+const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+if (isTouch) {
+  document.getElementById('touch-controls')?.classList.remove('hidden');
 }
+
+const config = {
+  type: Phaser.AUTO,
+  parent: 'game-root',
+  backgroundColor: '#0a1d12',
+  pixelArt: false,
+  scale: {
+    mode: Phaser.Scale.RESIZE,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: window.innerWidth,
+    height: window.innerHeight,
+  },
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 1400 },
+      debug: false,
+    },
+  },
+  scene: [BootScene, MenuScene, BedroomScene, JungleScene, TempleScene, EndingScene],
+};
+
+new Phaser.Game(config);

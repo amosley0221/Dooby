@@ -1,16 +1,16 @@
 {
   "name": "robey",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Robey - a 3D narrative escape game starting bright and turning dark.",
+  "description": "Robey's Wild Adventures: The Lost Jungle Temple - 2D side-scrolling adventure.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --host"
   },
   "dependencies": {
-    "three": "^0.160.0",
+    "phaser": "^3.80.1",
     "tone": "^14.7.77"
   },
   "devDependencies": {

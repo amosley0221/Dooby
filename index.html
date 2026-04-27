@@ -3,50 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0a0a14" />
+    <meta name="theme-color" content="#0a1d12" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <title>Robey</title>
+    <title>Robey's Wild Adventures</title>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <div id="app">
-      <canvas id="game-canvas"></canvas>
-
-      <div id="hud" class="hidden">
-        <div id="objective">Find the glowing seeds</div>
-        <div id="seed-count">0 / 5</div>
+    <div id="game-root"></div>
+    <div id="touch-controls" class="hidden">
+      <div id="dpad">
+        <button id="btn-left" class="dpad-btn" aria-label="Left">&#9664;</button>
+        <button id="btn-right" class="dpad-btn" aria-label="Right">&#9654;</button>
       </div>
-
-      <div id="subtitle" class="hidden"></div>
-
-      <div id="touch-controls" class="hidden">
-        <div id="joystick">
-          <div id="joystick-thumb"></div>
-        </div>
-        <button id="jump-button" aria-label="Jump">JUMP</button>
+      <div id="action-buttons">
+        <button id="btn-jump" class="action-btn" aria-label="Jump">JUMP</button>
+        <button id="btn-slash" class="action-btn" aria-label="Slash">SLASH</button>
       </div>
-
-      <div id="start-screen">
-        <h1>ROBEY</h1>
-        <p class="tag">a small creature, a bright morning, and something watching from the trees</p>
-        <button id="start-button">Begin</button>
-        <div class="controls-hint">
-          <span>WASD / Arrows to move</span>
-          <span>Space to jump</span>
-          <span>Mouse to look around</span>
-        </div>
-      </div>
-
-      <div id="end-screen" class="hidden">
-        <h2 id="end-title">You escaped.</h2>
-        <p id="end-text">For now.</p>
-        <button id="restart-button">Play again</button>
-      </div>
-
-      <div id="vignette"></div>
     </div>
-
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
