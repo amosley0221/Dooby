@@ -1,9 +1,9 @@
 {
-  "name": "dooby",
+  "name": "robey",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Dooby - a 3D narrative escape game starting bright and turning dark.",
+  "description": "Robey - a 3D narrative escape game starting bright and turning dark.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
-// A stylized placeholder Dooby: rounded body, big head, big eyes.
+// A stylized placeholder Robey: rounded body, big head, big eyes.
 // Built as a Group so it can later be swapped for a GLTF-rigged model
 // without changing physics/control logic.
-export function createDooby() {
+export function createRobey() {
   const root = new THREE.Group();
-  root.name = 'Dooby';
+  root.name = 'Robey';
 
   const skin = new THREE.MeshStandardMaterial({
     color: 0xffd9a0, roughness: 0.55, metalness: 0.0,
@@ -91,8 +91,8 @@ export function createDooby() {
 }
 
 // Simple bobbing/leg swing tied to ground speed; eye dilation tied to mood.
-export function animateDooby(dooby, dt, speed, fearLevel = 0) {
-  const ud = dooby.userData;
+export function animateRobey(robey, dt, speed, fearLevel = 0) {
+  const ud = robey.userData;
   const t = performance.now() / 1000;
 
   const stride = Math.min(speed / 4, 1);

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { initInput, readInput } from './input.js';
-import { createDooby, animateDooby } from './player.js';
+import { createRobey, animateRobey } from './player.js';
 import { buildWorld, applyMoodToWorld, WORLD } from './world.js';
 import { startAudio, setMoodAudio, playSting } from './audio.js';
 import { state, setPhase, setMood, addSeed, on, Phase, Mood, reset } from './state.js';
@@ -61,9 +61,9 @@ export class Game {
     this.world = buildWorld(this.scene);
 
     // -- Player --
-    this.dooby = createDooby();
-    this.dooby.position.set(0, 0, 8);
-    this.scene.add(this.dooby);
+    this.robey = createRobey();
+    this.robey.position.set(0, 0, 8);
+    this.scene.add(this.robey);
     this.velocity = new THREE.Vector3();
     this.grounded = true;
 
@@ -129,7 +129,7 @@ export class Game {
     this.cavernAnnounced = false;
     this.moodBlend = 0;
     this.moodBlendTarget = 0;
-    this.dooby.position.set(0, 0, 8);
+    this.robey.position.set(0, 0, 8);
     this.velocity.set(0, 0, 0);
     this.cameraYaw = 0;
     this.cameraPitch = -0.15;
@@ -184,9 +184,9 @@ export class Game {
     this.velocity.y -= 22 * dt;
 
     // Apply
-    this.dooby.position.addScaledVector(this.velocity, dt);
-    if (this.dooby.position.y <= WORLD.groundY) {
-      this.dooby.position.y = WORLD.groundY;
+    this.robey.position.addScaledVector(this.velocity, dt);
+    if (this.robey.position.y <= WORLD.groundY) {
+      this.robey.position.y = WORLD.groundY;
       this.velocity.y = 0;
       this.grounded = true;
     }
@@ -194,19 +194,19 @@ export class Game {
     // Face movement direction
     if (moveDir.lengthSq() > 0.001) {
       const targetYaw = Math.atan2(moveDir.x, moveDir.z);
-      this.dooby.rotation.y = lerpAngle(this.dooby.rotation.y, targetYaw, 1 - Math.exp(-12 * dt));
+      this.robey.rotation.y = lerpAngle(this.robey.rotation.y, targetYaw, 1 - Math.exp(-12 * dt));
     }
 
     // Obstacle avoidance (forest trees / rocks)
     for (const o of this.world.obstacles) {
-      const dx = this.dooby.position.x - o.x;
-      const dz = this.dooby.position.z - o.z;
+      const dx = this.robey.position.x - o.x;
+      const dz = this.robey.position.z - o.z;
       const d = Math.hypot(dx, dz);
       const minD = o.r + 0.4;
       if (d < minD && d > 0.0001) {
         const push = (minD - d);
-        this.dooby.position.x += (dx / d) * push;
-        this.dooby.position.z += (dz / d) * push;
+        this.robey.position.x += (dx / d) * push;
+        this.robey.position.z += (dz / d) * push;
       }
     }
 
@@ -216,7 +216,7 @@ export class Game {
       -Math.sin(this.cameraPitch),
       Math.cos(this.cameraYaw) * Math.cos(this.cameraPitch),
     ).multiplyScalar(this.cameraDistance);
-    const camTarget = this.dooby.position.clone().add(new THREE.Vector3(0, 1.6, 0));
+    const camTarget = this.robey.position.clone().add(new THREE.Vector3(0, 1.6, 0));
     const camPos = camTarget.clone().add(camOffset);
     this.camera.position.lerp(camPos, 1 - Math.exp(-10 * dt));
     this.camera.lookAt(camTarget.x, camTarget.y - 0.4, camTarget.z);
@@ -227,9 +227,9 @@ export class Game {
         if (!seed.visible) continue;
         seed.rotation.y += dt * 2;
         seed.position.y = 1 + Math.sin(performance.now() / 600 + seed.position.x) * 0.2;
-        const dx = seed.position.x - this.dooby.position.x;
-        const dz = seed.position.z - this.dooby.position.z;
-        if (Math.hypot(dx, dz) < 1.3 && Math.abs(seed.position.y - this.dooby.position.y - 0.8) < 1.3) {
+        const dx = seed.position.x - this.robey.position.x;
+        const dz = seed.position.z - this.robey.position.z;
+        if (Math.hypot(dx, dz) < 1.3 && Math.abs(seed.position.y - this.robey.position.y - 0.8) < 1.3) {
           seed.visible = false;
           seed.userData.collected = true;
           addSeed();
@@ -269,14 +269,14 @@ export class Game {
     // ---- Story prop proximity hints ----
     this.checkStoryProps();
 
-    // ---- Animate Dooby ----
+    // ---- Animate Robey ----
     const speed = Math.hypot(this.velocity.x, this.velocity.z);
     const fear = THREE.MathUtils.clamp(this.moodBlend, 0, 1);
-    animateDooby(this.dooby, dt, speed, fear);
+    animateRobey(this.robey, dt, speed, fear);
   }
 
   updateStory(dt) {
-    const z = this.dooby.position.z;
+    const z = this.robey.position.z;
     const seedsAll = state.seedsCollected >= state.seedsTotal;
 
     // Beat 1: All seeds collected → uneasy, sky dims
@@ -293,9 +293,9 @@ export class Game {
       setMood(Mood.DARK);
       this.moodBlendTarget = 1.0;
       this.stalker.visible = true;
-      this.stalker.position.set(this.dooby.position.x, 0, this.dooby.position.z - 30);
+      this.stalker.position.set(this.robey.position.x, 0, this.robey.position.z - 30);
       playSting('realize');
-      showSubtitle('Run, Dooby. Run.', 5000);
+      showSubtitle('Run, Robey. Run.', 5000);
       // Flip to flee phase after a beat.
       setTimeout(() => {
         setPhase(Phase.FLEE);
@@ -306,8 +306,8 @@ export class Game {
     // Beat 2.5: Moonlight pool — false safety. Stalker recedes briefly.
     const pool = this.world.pool;
     if (pool && this.realizationTriggered && state.phase !== Phase.ESCAPED) {
-      const dx = this.dooby.position.x - pool.x;
-      const dz = this.dooby.position.z - pool.z;
+      const dx = this.robey.position.x - pool.x;
+      const dz = this.robey.position.z - pool.z;
       const inPool = Math.hypot(dx, dz) < pool.r;
       if (inPool && !this.poolTriggered) {
         this.poolTriggered = true;
@@ -316,7 +316,7 @@ export class Game {
         this.moodBlendTarget = 0.55;
         showSubtitle('The light is warm. For a moment, you are small and safe.', 5000);
         // Push the stalker back so the player gets a real beat of relief.
-        this.stalker.position.z = this.dooby.position.z - 28;
+        this.stalker.position.z = this.robey.position.z - 28;
       }
       if (!inPool && this.poolTriggered && !this.poolLeft &&
           performance.now() - this.poolEnterTime > 1500) {
@@ -329,9 +329,9 @@ export class Game {
           this.lumbererSpawned = true;
           this.stalker2.visible = true;
           this.stalker2.position.set(
-            this.dooby.position.x + (Math.random() < 0.5 ? -6 : 6),
+            this.robey.position.x + (Math.random() < 0.5 ? -6 : 6),
             0,
-            this.dooby.position.z + 18
+            this.robey.position.z + 18
           );
         }
       }
@@ -354,8 +354,8 @@ export class Game {
     if (state.phase === Phase.FLEE || state.phase === Phase.REALIZE) {
       const closeTo = (s) => {
         if (!s.visible) return false;
-        const ddx = s.position.x - this.dooby.position.x;
-        const ddz = s.position.z - this.dooby.position.z;
+        const ddx = s.position.x - this.robey.position.x;
+        const ddz = s.position.z - this.robey.position.z;
         return Math.hypot(ddx, ddz) < 1.4;
       };
       if (closeTo(this.stalker) || closeTo(this.stalker2)) {
@@ -371,8 +371,8 @@ export class Game {
     for (const s of stories) {
       const story = s.userData?.story;
       if (!story || story.seen) continue;
-      const dx = s.position.x - this.dooby.position.x;
-      const dz = s.position.z - this.dooby.position.z;
+      const dx = s.position.x - this.robey.position.x;
+      const dz = s.position.z - this.robey.position.z;
       if (Math.hypot(dx, dz) < story.radius) {
         story.seen = true;
         showSubtitle(story.line, 4000);
@@ -383,7 +383,7 @@ export class Game {
   updateStalker(dt) {
     // The thin stalker chases relentlessly. Slowed in the moonlight pool's
     // immediate vicinity so the relief beat feels real.
-    const target = this.dooby.position;
+    const target = this.robey.position;
     const dir = new THREE.Vector3(target.x - this.stalker.position.x, 0, target.z - this.stalker.position.z);
     const dist = dir.length();
     if (dist > 0.001) dir.normalize();
@@ -398,7 +398,7 @@ export class Game {
 
   updateLumberer(dt) {
     // Slower but starts closer once spawned. Sways heavily.
-    const target = this.dooby.position;
+    const target = this.robey.position;
     const dir = new THREE.Vector3(target.x - this.stalker2.position.x, 0, target.z - this.stalker2.position.z);
     const dist = dir.length();
     if (dist > 0.001) dir.normalize();
