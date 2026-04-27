@@ -1,0 +1,19 @@
+{
+  "name": "dooby",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Dooby - a 3D narrative escape game starting bright and turning dark.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "three": "^0.160.0",
+    "tone": "^14.7.77"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
