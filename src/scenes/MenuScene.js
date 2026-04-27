@@ -64,24 +64,27 @@ export class MenuScene extends Phaser.Scene {
     btn.setInteractive({ useHandCursor: true });
     btn.on('pointerover', () => btn.setScale(1.04));
     btn.on('pointerout', () => btn.setScale(1));
-    btn.on('pointerdown', async () => {
-      btn.disableInteractive();
-      await startAudio();
-      setMoodAudio('bright');
-      this.scene.start('BedroomScene');
-    });
 
-    this.add.text(cx, height - 40, 'Tap / Click anywhere to begin', {
+    this.add.text(cx, height - 40, 'Tap or click anywhere to begin', {
       fontFamily: 'Bookman Old Style, Georgia, serif',
       fontSize: '16px', color: '#fff7d6',
     }).setOrigin(0.5).setAlpha(0.7);
 
-    this.input.once('pointerdown', async (pointer) => {
-      if (btn.input?.enabled === false) return;
+    // One click handler at the scene level handles both the button and
+    // anywhere-else taps. Scene transition is independent of audio start
+    // so a stalled AudioContext can never block the game.
+    let started = false;
+    const begin = () => {
+      if (started) return;
+      started = true;
       btn.disableInteractive();
-      await startAudio();
-      setMoodAudio('bright');
+      // Fire-and-forget — audio is best-effort, never blocks the scene.
+      Promise.resolve()
+        .then(() => startAudio())
+        .then(() => setMoodAudio('bright'))
+        .catch((err) => console.warn('audio start failed', err));
       this.scene.start('BedroomScene');
-    });
+    };
+    this.input.on('pointerdown', begin);
   }
 }

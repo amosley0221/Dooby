@@ -12,10 +12,10 @@ export class BedroomScene extends Phaser.Scene {
 
     this.bg = this.add.image(cx, height / 2, 'bg-bedroom').setDisplaySize(width, height);
 
-    // Floor as a static body
-    this.floor = this.physics.add.staticGroup();
+    // Floor as a static body (invisible rectangle with a static body attached)
     const floorRect = this.add.rectangle(cx, groundY + 40, width * 2, 80, 0, 0);
-    this.floor.add(floorRect);
+    this.physics.add.existing(floorRect, true);
+    this.floor = floorRect;
 
     this.robey = new Robey(this, cx - 80, groundY);
     this.physics.add.collider(this.robey, this.floor);

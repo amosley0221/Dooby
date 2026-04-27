@@ -13,8 +13,9 @@ export class EndingScene extends Phaser.Scene {
 
     this.add.image(cx, height / 2, 'bg-bedroom').setDisplaySize(width, height);
 
-    this.floor = this.physics.add.staticGroup();
-    this.floor.add(this.add.rectangle(cx, groundY + 40, width * 2, 80, 0, 0));
+    const floorRect = this.add.rectangle(cx, groundY + 40, width * 2, 80, 0, 0);
+    this.physics.add.existing(floorRect, true);
+    this.floor = floorRect;
 
     this.robey = new Robey(this, cx, groundY - 220);
     this.physics.add.collider(this.robey, this.floor, () => {
