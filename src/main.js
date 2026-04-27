@@ -1,5 +1,5 @@
 import { Game } from './game.js';
-import { state, on, Phase } from './state.js';
+import { state, on, Phase, Mood } from './state.js';
 
 const canvas = document.getElementById('game-canvas');
 const startScreen = document.getElementById('start-screen');
@@ -38,12 +38,16 @@ on((event) => {
   }
   if (event.type === 'phase') {
     if (event.value === Phase.REALIZE || event.value === Phase.FLEE) {
-      objective.textContent = 'Reach the hollow log';
+      objective.textContent = 'Reach the hollow log beyond the cavern';
     }
     if (event.value === Phase.MENU) {
       objective.textContent = 'Find the glowing seeds';
       seedCount.textContent = `0 / ${state.seedsTotal}`;
     }
+  }
+  if (event.type === 'mood') {
+    if (event.value === Mood.HOPE) objective.textContent = 'Stay in the light...';
+    else if (event.value === Mood.ESCAPE) objective.textContent = 'Reach the hollow log beyond the cavern';
   }
 });
 

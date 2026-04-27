@@ -5,6 +5,7 @@ export const Mood = Object.freeze({
   UNEASY: 'uneasy',
   DARK: 'dark',
   ESCAPE: 'escape',
+  HOPE: 'hope',
 });
 
 export const Phase = Object.freeze({

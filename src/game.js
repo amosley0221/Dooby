@@ -67,10 +67,15 @@ export class Game {
     this.velocity = new THREE.Vector3();
     this.grounded = true;
 
-    // -- Stalker (the unseen thing watching) --
+    // -- Stalkers --
+    // Primary: thin, fast, the realization moment.
     this.stalker = makeStalker();
     this.stalker.visible = false;
     this.scene.add(this.stalker);
+    // Secondary: lumbering, slow, joins after the moonlight pool.
+    this.stalker2 = makeLumberer();
+    this.stalker2.visible = false;
+    this.scene.add(this.stalker2);
 
     // -- Mood blend (0 bright → 1 dark) --
     this.moodBlend = 0;
@@ -78,6 +83,11 @@ export class Game {
 
     // -- Story flags --
     this.realizationTriggered = false;
+    this.poolTriggered = false;
+    this.poolLeft = false;
+    this.poolEnterTime = 0;
+    this.lumbererSpawned = false;
+    this.cavernAnnounced = false;
 
     // -- Wire input + resize --
     initInput(canvas);
@@ -112,6 +122,11 @@ export class Game {
   resetForRestart() {
     reset();
     this.realizationTriggered = false;
+    this.poolTriggered = false;
+    this.poolLeft = false;
+    this.poolEnterTime = 0;
+    this.lumbererSpawned = false;
+    this.cavernAnnounced = false;
     this.moodBlend = 0;
     this.moodBlendTarget = 0;
     this.dooby.position.set(0, 0, 8);
@@ -119,10 +134,15 @@ export class Game {
     this.cameraYaw = 0;
     this.cameraPitch = -0.15;
     this.stalker.visible = false;
+    this.stalker2.visible = false;
     // Restore seeds
     for (const seed of this.world.seeds) {
       seed.userData.collected = false;
       seed.visible = true;
+    }
+    // Reset story prop "seen" flags
+    for (const s of this.world.stories ?? []) {
+      if (s.userData?.story) s.userData.story.seen = false;
     }
     setMood(Mood.BRIGHT);
     setPhase(Phase.EXPLORE);
@@ -242,6 +262,12 @@ export class Game {
     if (this.stalker.visible) {
       this.updateStalker(dt);
     }
+    if (this.stalker2.visible) {
+      this.updateLumberer(dt);
+    }
+
+    // ---- Story prop proximity hints ----
+    this.checkStoryProps();
 
     // ---- Animate Dooby ----
     const speed = Math.hypot(this.velocity.x, this.velocity.z);
@@ -277,6 +303,46 @@ export class Game {
       }, 2000);
     }
 
+    // Beat 2.5: Moonlight pool — false safety. Stalker recedes briefly.
+    const pool = this.world.pool;
+    if (pool && this.realizationTriggered && state.phase !== Phase.ESCAPED) {
+      const dx = this.dooby.position.x - pool.x;
+      const dz = this.dooby.position.z - pool.z;
+      const inPool = Math.hypot(dx, dz) < pool.r;
+      if (inPool && !this.poolTriggered) {
+        this.poolTriggered = true;
+        this.poolEnterTime = performance.now();
+        setMood(Mood.HOPE);
+        this.moodBlendTarget = 0.55;
+        showSubtitle('The light is warm. For a moment, you are small and safe.', 5000);
+        // Push the stalker back so the player gets a real beat of relief.
+        this.stalker.position.z = this.dooby.position.z - 28;
+      }
+      if (!inPool && this.poolTriggered && !this.poolLeft &&
+          performance.now() - this.poolEnterTime > 1500) {
+        this.poolLeft = true;
+        setMood(Mood.ESCAPE);
+        this.moodBlendTarget = 1.0;
+        showSubtitle('The warmth fades. Something heavy moves behind you.', 4500);
+        // Spawn the lumberer from behind once the player leaves the pool.
+        if (!this.lumbererSpawned) {
+          this.lumbererSpawned = true;
+          this.stalker2.visible = true;
+          this.stalker2.position.set(
+            this.dooby.position.x + (Math.random() < 0.5 ? -6 : 6),
+            0,
+            this.dooby.position.z + 18
+          );
+        }
+      }
+    }
+
+    // Beat 2.75: Cavern entrance announcement
+    if (this.realizationTriggered && !this.cavernAnnounced && z < WORLD.cavernZStart + 2) {
+      this.cavernAnnounced = true;
+      showSubtitle('The world narrows. Embers ahead.', 4000);
+    }
+
     // Beat 3: Reach the exit
     if (state.phase !== Phase.ESCAPED && z < WORLD.exitZ + 2.5 && this.realizationTriggered) {
       setPhase(Phase.ESCAPED);
@@ -284,12 +350,15 @@ export class Game {
       this.onEnd?.('escaped');
     }
 
-    // Beat 4: Caught (stalker close enough)
-    if (state.phase === Phase.FLEE) {
-      const dx = this.stalker.position.x - this.dooby.position.x;
-      const dz = this.stalker.position.z - this.dooby.position.z;
-      const d = Math.hypot(dx, dz);
-      if (d < 1.4) {
+    // Beat 4: Caught (either stalker close enough)
+    if (state.phase === Phase.FLEE || state.phase === Phase.REALIZE) {
+      const closeTo = (s) => {
+        if (!s.visible) return false;
+        const ddx = s.position.x - this.dooby.position.x;
+        const ddz = s.position.z - this.dooby.position.z;
+        return Math.hypot(ddx, ddz) < 1.4;
+      };
+      if (closeTo(this.stalker) || closeTo(this.stalker2)) {
         setPhase(Phase.CAUGHT);
         showSubtitle('It found you.', 4000);
         this.onEnd?.('caught');
@@ -297,21 +366,48 @@ export class Game {
     }
   }
 
+  checkStoryProps() {
+    const stories = this.world.stories ?? [];
+    for (const s of stories) {
+      const story = s.userData?.story;
+      if (!story || story.seen) continue;
+      const dx = s.position.x - this.dooby.position.x;
+      const dz = s.position.z - this.dooby.position.z;
+      if (Math.hypot(dx, dz) < story.radius) {
+        story.seen = true;
+        showSubtitle(story.line, 4000);
+      }
+    }
+  }
+
   updateStalker(dt) {
-    // Stalker drifts toward Dooby; slower than Dooby's flee speed but
-    // accelerates as the chase progresses.
+    // The thin stalker chases relentlessly. Slowed in the moonlight pool's
+    // immediate vicinity so the relief beat feels real.
     const target = this.dooby.position;
     const dir = new THREE.Vector3(target.x - this.stalker.position.x, 0, target.z - this.stalker.position.z);
     const dist = dir.length();
     if (dist > 0.001) dir.normalize();
     const elapsed = (performance.now() - state.startedAt) / 1000;
-    const speed = 4 + Math.min(2.5, elapsed / 60);
+    let speed = 3.4 + Math.min(2.2, elapsed / 80);
+    if (state.mood === Mood.HOPE) speed *= 0.35;
     this.stalker.position.x += dir.x * speed * dt;
     this.stalker.position.z += dir.z * speed * dt;
-    // Hover bob
     this.stalker.position.y = 0.6 + Math.sin(performance.now() / 300) * 0.15;
-    // Face the player
     this.stalker.rotation.y = Math.atan2(dir.x, dir.z);
+  }
+
+  updateLumberer(dt) {
+    // Slower but starts closer once spawned. Sways heavily.
+    const target = this.dooby.position;
+    const dir = new THREE.Vector3(target.x - this.stalker2.position.x, 0, target.z - this.stalker2.position.z);
+    const dist = dir.length();
+    if (dist > 0.001) dir.normalize();
+    let speed = 2.6;
+    if (state.mood === Mood.HOPE) speed *= 0.3;
+    this.stalker2.position.x += dir.x * speed * dt;
+    this.stalker2.position.z += dir.z * speed * dt;
+    this.stalker2.position.y = 0.0 + Math.sin(performance.now() / 600) * 0.05;
+    this.stalker2.rotation.y = Math.atan2(dir.x, dir.z) + Math.sin(performance.now() / 400) * 0.15;
   }
 }
 
@@ -321,6 +417,37 @@ function lerpAngle(a, b, t) {
   while (diff > Math.PI) diff -= Math.PI * 2;
   while (diff < -Math.PI) diff += Math.PI * 2;
   return a + diff * t;
+}
+
+function makeLumberer() {
+  // A bulky, hunched figure - slower, broader, with a single dim eye.
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.SphereGeometry(1.0, 14, 12),
+    new THREE.MeshStandardMaterial({ color: 0x0a0810, roughness: 1 })
+  );
+  body.scale.set(1.2, 0.95, 1.0);
+  body.position.y = 1.0;
+  g.add(body);
+  const hump = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 12, 10),
+    new THREE.MeshStandardMaterial({ color: 0x0a0810, roughness: 1 })
+  );
+  hump.position.set(0, 1.7, -0.2);
+  g.add(hump);
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.4, 12, 10),
+    new THREE.MeshStandardMaterial({ color: 0x0a0810, roughness: 1 })
+  );
+  head.position.set(0, 1.6, 0.6);
+  g.add(head);
+  const eye = new THREE.Mesh(
+    new THREE.SphereGeometry(0.09, 10, 8),
+    new THREE.MeshBasicMaterial({ color: 0xffaa44 })
+  );
+  eye.position.set(0, 1.7, 0.95);
+  g.add(eye);
+  return g;
 }
 
 function makeStalker() {

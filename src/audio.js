@@ -186,6 +186,7 @@ export function setMoodAudio(mood) {
     [Mood.UNEASY]:  { bright: -8,  dark: -8,  escape: -60, bpm: 96 },
     [Mood.DARK]:    { bright: -60, dark: 0,   escape: -60, bpm: 88 },
     [Mood.ESCAPE]:  { bright: -60, dark: -2,  escape: 0,   bpm: 132 },
+    [Mood.HOPE]:    { bright: -10, dark: -8,  escape: -60, bpm: 70 },
   };
   const t = targets[mood];
   if (!t) return;
